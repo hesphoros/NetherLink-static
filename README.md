@@ -64,6 +64,12 @@ NetherLink‑static 是一个基于 Qt 的聊天社交客户端静态演示，**
 3. **帖子中心**
 4. **AI 对话窗口**
 
+![](https://github.com/ming0725/NetherLink-static/blob/master/doc/images/1_chat.jpg)
+![](https://github.com/ming0725/NetherLink-static/blob/master/doc/images/2_friends.png)
+![](https://github.com/ming0725/NetherLink-static/blob/master/doc/images/3_posts.png)
+![](https://github.com/ming0725/NetherLink-static/blob/master/doc/images/4_detail_post.png)
+![](https://github.com/ming0725/NetherLink-static/blob/master/doc/images/5_aichat.png)
+
 ---
 
 ## 🚀 安装与启动
