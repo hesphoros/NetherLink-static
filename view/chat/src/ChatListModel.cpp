@@ -2,8 +2,8 @@
 #include <QDateTime>
 #include <QDebug>
 
-Q_DECLARE_METATYPE(TimeHeader*);
-Q_DECLARE_METATYPE(ChatMessage*);
+Q_DECLARE_METATYPE(TimeHeader*)
+Q_DECLARE_METATYPE(ChatMessage*)
 
 ChatListModel::ChatListModel(QObject* parent)
     : QAbstractListModel(parent)
@@ -225,7 +225,6 @@ TimeHeaderType ChatListModel::getTimeHeaderType(const QDateTime& timestamp) cons
 
 QString ChatListModel::formatTimeHeader(const QDateTime& timestamp) const
 {
-    QDateTime now = QDateTime::currentDateTime();
     QString timeStr = timestamp.toString("HH:mm");
     
     switch (getTimeHeaderType(timestamp)) {
