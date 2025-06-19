@@ -2,8 +2,8 @@
 #include <QDateTime>
 #include <QDebug>
 
-Q_DECLARE_METATYPE(TimeHeader*)
-Q_DECLARE_METATYPE(ChatMessage*)
+Q_DECLARE_METATYPE(TimeHeader*);
+Q_DECLARE_METATYPE(ChatMessage*);
 
 ChatListModel::ChatListModel(QObject* parent)
     : QAbstractListModel(parent)
