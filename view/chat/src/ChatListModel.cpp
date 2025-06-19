@@ -3,11 +3,13 @@
 #include <QDebug>
 
 Q_DECLARE_METATYPE(TimeHeader*)
+Q_DECLARE_METATYPE(ChatMessage*)
 
 ChatListModel::ChatListModel(QObject* parent)
     : QAbstractListModel(parent)
 {
     qRegisterMetaType<TimeHeader*>();
+    qRegisterMetaType<ChatMessage*>();
 }
 
 int ChatListModel::rowCount(const QModelIndex& parent) const
