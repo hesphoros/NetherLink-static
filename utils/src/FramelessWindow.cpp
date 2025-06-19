@@ -1,55 +1,81 @@
+// FramelessWindow.cpp
 #include "FramelessWindow.h"
-#include <QPoint>
-#include <QMouseEvent>
-
-constexpr int RESIZE_WINDOW_WIDTH = 8;
-// 如果 DWMWA_WINDOW_CORNER_PREFERENCE 未定义，则手动声明
-#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
-// 枚举值定义参考 Windows 11 SDK dwmapi.h
-enum DWM_WINDOW_CORNER_PREFERENCE {
-    DWMWCP_DEFAULT    = 0,  // 系统决定是否圆角
-    DWMWCP_DONOTROUND = 1,  // 不圆角
-    DWMWCP_ROUND      = 2,  // 常规圆角
-    DWMWCP_ROUNDSMALL = 3   // 小半径圆角
-};
-static const DWORD DWMWA_WINDOW_CORNER_PREFERENCE = 33;  // 窗口圆角策略标识符
-#endif
+#include <QEvent>
 
 FramelessWindow::FramelessWindow(QWidget* parent)
         : QWidget(parent)
 {
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
     setAttribute(Qt::WA_TranslucentBackground);
+
     HWND hwnd = HWND(winId());
     LONG style = ::GetWindowLong(hwnd, GWL_STYLE);
     ::SetWindowLong(hwnd, GWL_STYLE,
                     style | WS_THICKFRAME | WS_CAPTION | WS_MAXIMIZEBOX);
+
     UINT preference = DWMWCP_ROUND;
     DwmSetWindowAttribute(hwnd,
                           DWMWA_WINDOW_CORNER_PREFERENCE,
                           &preference, sizeof(preference));
 }
 
+void FramelessWindow::setTitleBar(QWidget* titleBar)
+{
+    m_titleBar = titleBar;
+}
+
 bool FramelessWindow::nativeEvent(const QByteArray& eventType, void* message, qint64* result)
 {
     MSG* msg = reinterpret_cast<MSG*>(message);
     switch (msg->message) {
-        case WM_NCCALCSIZE: {
+        case WM_NCCALCSIZE:
             *result = 0;
             return true;
-        }
+
         case WM_NCHITTEST: {
-            long x = GET_X_LPARAM(msg->lParam);
-            long y = GET_Y_LPARAM(msg->lParam);
-            QPoint mouse_pos(x, y);
-            *result = this->adjustResizeWindow(mouse_pos);
-            if (0 != *result)
+            const LONG gx = GET_X_LPARAM(msg->lParam);
+            const LONG gy = GET_Y_LPARAM(msg->lParam);
+            QPoint globalPos(gx, gy);
+
+            int hit = adjustResizeWindow(globalPos);
+            if (hit) {
+                *result = hit;
                 return true;
+            }
+
+            // 标题栏拖拽检测
+            if (m_titleBar) {
+                double dpr = devicePixelRatioF();
+                QPoint local = m_titleBar->mapFromGlobal(QPoint(gx / dpr, gy / dpr));
+                if (m_titleBar->rect().contains(local)) {
+                    QWidget* child = m_titleBar->childAt(local);
+                    if (!child) {
+                        *result = HTCAPTION;
+                        return true;
+                    }
+                }
+            }
             return false;
         }
         default:
             return QWidget::nativeEvent(eventType, message, result);
     }
+}
+
+bool FramelessWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::WindowStateChange) {
+        bool maximized = isMaximized();
+        if (maximized != m_isMaximized) {
+            m_isMaximized = maximized;
+            if (maximized) {
+                setContentsMargins(0, 0, 0, 0);
+            } else {
+                setContentsMargins(8, 8, 8, 8);
+            }
+        }
+    }
+    return QWidget::event(event);
 }
 
 int FramelessWindow::adjustResizeWindow(const QPoint& pos)
@@ -94,33 +120,4 @@ int FramelessWindow::adjustResizeWindow(const QPoint& pos)
             result = HTBOTTOMRIGHT;
     }
     return result;
-}
-
-void FramelessWindow::mousePressEvent(QMouseEvent* event)
-{
-
-    if (event->button() == Qt::LeftButton && event->pos().y() <= 63) {
-        m_dragging = true;
-        m_dragPos  = event->globalPosition().toPoint() - frameGeometry().topLeft();
-        event->accept();
-    }
-    QWidget::mousePressEvent(event);
-}
-
-void FramelessWindow::mouseMoveEvent(QMouseEvent* event)
-{
-    if (m_dragging && (event->buttons() & Qt::LeftButton)) {
-        move(event->globalPosition().toPoint() - m_dragPos);
-        event->accept();
-    }
-    QWidget::mouseMoveEvent(event);
-}
-
-void FramelessWindow::mouseReleaseEvent(QMouseEvent* event)
-{
-    if (event->button() == Qt::LeftButton) {
-        m_dragging = false;
-        event->accept();
-    }
-    QWidget::mouseReleaseEvent(event);
 }

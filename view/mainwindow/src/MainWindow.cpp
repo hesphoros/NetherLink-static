@@ -25,18 +25,24 @@ MainWindow::MainWindow(QWidget* parent)
     appBar = new ApplicationBar(this);
     appBar->setFixedWidth(54);
 
+    titleBar = new QWidget(this);
+    titleBar->setFixedHeight(32);
     // 窗口控制按钮
-    btnMinimize = new QPushButton(this);
-    btnMaximize = new QPushButton(this);
-    btnClose    = new QPushButton(this);
+    btnMinimize = new QPushButton(titleBar);
+    btnMaximize = new QPushButton(titleBar);
+    btnClose    = new QPushButton(titleBar);
     iconClose       = QIcon(":/resources/icon/close.png");
     iconCloseHover  = QIcon(":/resources/icon/hovered_close.png");
     btnMinimize->setIcon(QIcon(":/resources/icon/minimize.png"));
     btnMaximize->setIcon(QIcon(":/resources/icon/maximize.png"));
-    btnClose->installEventFilter(this);
+
     btnMinimize->setIconSize(QSize(16, 16));
     btnMaximize->setIconSize(QSize(16, 16));
-    btnClose->setIconSize(QSize(16, 16));
+    btnClose   ->setIconSize(QSize(16, 16));
+
+    btnMinimize->setFixedSize(32, 32);
+    btnMaximize->setFixedSize(32, 32);
+    btnClose   ->setFixedSize(32, 32);
 
     auto btnStyle = R"(
         QPushButton {
@@ -61,11 +67,21 @@ MainWindow::MainWindow(QWidget* parent)
     }
     )");
 
+    // 方便换图标 hover 效果依旧装事件过滤器
+    btnClose->installEventFilter(this);
 
-    int btnSize = 32;
-    btnMinimize->setFixedSize(btnSize, btnSize);
-    btnMaximize->setFixedSize(btnSize, btnSize);
-    btnClose->setFixedSize(btnSize, btnSize);
+    auto hl = new QHBoxLayout(titleBar);
+    hl->setContentsMargins(0,0,0,0);
+    hl->addStretch();            // 左侧空白
+    hl->addWidget(btnMinimize);
+    hl->addWidget(btnMaximize);
+    hl->addWidget(btnClose);
+    hl->setSpacing(0);
+
+    // 3) 告诉 FramelessWindow：这是标题栏
+    setTitleBar(titleBar);
+
+
     stack->addWidget(new MessageApplication(this));
     stack->addWidget(new FriendApplication(this));
     stack->addWidget(new PostApplication(this));
@@ -97,14 +113,14 @@ MainWindow::MainWindow(QWidget* parent)
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
     FramelessWindow::resizeEvent(event);
-    int w = width(), h = height();
+    int w = width();
+    int h = height();
+    // 把左侧应用栏和中央 stack 摆好
     int barW = appBar->width();
     appBar->setGeometry(0, 0, barW, h);
-    stack->setGeometry(barW, 0, w - barW, h);
-    int bw = btnMinimize->width();
-    btnClose->move(w - bw,    0);
-    btnMaximize->move(w - bw*2,0);
-    btnMinimize->move(w - bw*3,0);
+    stack->setGeometry(barW, 0, w-barW, h);
+    // 把 titleBar 铺满顶部
+    titleBar->setGeometry(barW, 0, w-barW, titleBar->height());
 }
 
 

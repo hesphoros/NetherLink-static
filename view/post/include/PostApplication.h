@@ -5,10 +5,10 @@
 #include <QStackedWidget>
 #include <QImage>
 #include <QPixmap>
+#include "Post.h"
 
 class PostFeedPage;
 class PostApplicationBar;
-class Post;
 class PostDetailView;
 class PostCreatePage;
 

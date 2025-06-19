@@ -3,10 +3,11 @@
 
 #include "CustomScrollArea.h"
 #include "PostPreviewItem.h"
+#include "Post.h"
 #include <QVector>
 #include <QWidget>
 
-class Post;
+
 class PostFeedPage : public CustomScrollArea {
     Q_OBJECT
 public:

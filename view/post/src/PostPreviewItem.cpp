@@ -91,6 +91,9 @@ void PostPreviewItem::setupUI(const QString& firstImagePath) {
 
 void PostPreviewItem::resizeEvent(QResizeEvent* ev) {
     QWidget::resizeEvent(ev);
+    if (m_croppedPostImage.isNull()) {
+        return;
+    }
     int W = width();
     // 1) 图片等比例放大到全宽
     double r = double(m_croppedPostImage.width()) / double(m_croppedPostImage.height());

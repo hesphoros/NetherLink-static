@@ -25,6 +25,7 @@ private slots:
 private:
     ApplicationBar *appBar;
     QWidget *rightContent;
+    QWidget *titleBar;
     int contentFixedWidth;
     QSplitter *splitter;
     QPushButton *btnMinimize;
