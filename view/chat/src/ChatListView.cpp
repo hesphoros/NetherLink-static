@@ -21,6 +21,7 @@ ChatListView::ChatListView(QWidget *parent)
     // 创建自定义滚动条
     customScrollBar = new SmoothScrollBar(this);
     customScrollBar->hide();
+    viewport()->setAttribute(Qt::WA_PaintOnScreen, true);
     
     // 创建滚动动画
     scrollAnimation = new QPropertyAnimation(this, "smoothScrollValue", this);
@@ -121,8 +122,8 @@ void ChatListView::resizeEvent(QResizeEvent *event)
         for (int i = 0; i < model()->rowCount(); ++i) {
             QModelIndex index = model()->index(i, 0);
             update(index);
-            doItemsLayout();
         }
+        doItemsLayout();
     }
 }
 
@@ -173,15 +174,15 @@ void ChatListView::setSmoothScrollValue(int value)
     // 检查是否需要滚动
     QScrollBar* vScrollBar = verticalScrollBar();
     int totalHeight = vScrollBar->maximum() + vScrollBar->pageStep();
-    
+
     // 只在内容高度大于视口高度时更新滚动值
     if (totalHeight > viewport()->height()) {
         if (m_smoothScrollValue != value) {
             bool isAtBottom = value >= vScrollBar->maximum() - 5;
-            
+
             m_smoothScrollValue = value;
             vScrollBar->setValue(value);
-            
+
             if (!isAtBottom) {
                 // 不在底部时才更新自定义滚动条的位置
                 if (customScrollBar->isVisible()) {
@@ -324,7 +325,6 @@ void ChatListView::scrollToBottom()
     if (totalHeight > viewport()->height()) {
         // 检查是否接近底部
         int currentBottom = vScrollBar->value() + viewport()->height();
-        qDebug() << "scroll diff: "  << (totalHeight - currentBottom);
         int offset = totalHeight - currentBottom;
         bool isNearBottom = offset <= NEAR_BUTTOM_THRESHOLD;
 
@@ -353,10 +353,8 @@ void ChatListView::scrollToBottom()
             customScrollBar->show();
             customScrollBar->showScrollBar();
         }
-
         // 开始动画
         scrollAnimation->start();
     }
 }
-
 

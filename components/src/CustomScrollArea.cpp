@@ -97,11 +97,9 @@ bool CustomScrollArea::eventFilter(QObject* obj, QEvent* ev)
             int maxThumbOffset = height() - thumb->height();
             thumbOffset = qBound(0, thumbOffsetAtStart + deltaY, maxThumbOffset);
             if (thumbOffset <= 10) {
-                qDebug() << "reachedTop";
                 emit reachedTop();
             }
             if (thumbOffset >= maxThumbOffset - 10) {
-                qDebug() << "reachedBottom";
                 emit reachedBottom();
             }
             int maxContentOffset = contentWidget->height() - height();
@@ -136,11 +134,9 @@ void CustomScrollArea::animateTo(int targetY) {
     scrollAnimation->stop();
     targetY = qBound(0, targetY, maxOffset);
     if (targetY <= 10) {
-        qDebug() << "reachedTop";
         emit reachedTop();
     }
     if (targetY >= maxOffset - 10) {
-        qDebug() << "reachedButtom";
         emit reachedBottom();
     }
     scrollAnimation->setFrameRange(currentOffset, targetY);
